@@ -79,12 +79,17 @@
 </head>
 <body>
 
-    <!-- Calorie Setup Modal -->
-    <div id="calorieModal" class="modal">
+    <!-- Sign Up / Sign In Modal -->
+    <div id="authModal" class="modal">
         <div class="glass-effect p-8 rounded-2xl max-w-md w-full">
-            <h2 class="text-2xl font-bold gradient-text text-center mb-4">Set Your Daily Calorie Goal</h2>
-            <input id="calorieInput" type="number" placeholder="Enter calorie goal" class="w-full p-4 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
-            <button class="button mt-6 w-full" onclick="setCalorieGoal()">Start Tracking</button>
+            <h2 class="text-2xl font-bold gradient-text text-center mb-4">Sign Up / Sign In</h2>
+            <div class="mb-4">
+                <input id="usernameInput" type="text" placeholder="Enter your name" class="w-full p-4 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+            </div>
+            <div class="mb-4">
+                <input id="calorieInput" type="number" placeholder="Enter your calorie goal" class="w-full p-4 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+            </div>
+            <button class="button mt-6 w-full" onclick="signUp()">Sign Up / Sign In</button>
         </div>
     </div>
 
@@ -180,7 +185,7 @@
             { name: "Greek Yogurt Parfait", calories: 280, protein: 15, fat: 4, carbs: 35, type: "vegetarian" },
             // Add more meals here
         ];
-        let calorieGoal = 0, userName = "Guest,"
+        let calorieGoal = 0, userName = "Guest", userSignedIn = false;
 
         document.addEventListener('DOMContentLoaded', () => {
             checkLocalStorage(); // Check if user data is stored in localStorage
@@ -194,21 +199,28 @@
             if (user) {
                 userName = user.name;
                 calorieGoal = user.calorieGoal;
+                userSignedIn = true;
                 document.getElementById('userName').textContent = userName;
                 document.getElementById('calorieModal').classList.remove('active');
+                document.getElementById('authModal').classList.remove('active');
                 updateCalories();
             } else {
-                document.getElementById('calorieModal').classList.add('active');
+                document.getElementById('authModal').classList.add('active');
             }
         }
 
         // Function to set daily calorie goal
-        function setCalorieGoal() {
-            const calorieInput = document.getElementById('calorieInput').value;
-            if (calorieInput > 0) {
-                localStorage.setItem('user', JSON.stringify({ name: userName, calorieGoal: parseInt(calorieInput) }));
-                calorieGoal = parseInt(calorieInput);
-                document.getElementById('calorieModal').classList.remove('active');
+        function signUp() {
+            const usernameInput = document.getElementById('usernameInput').value;
+            const calorieInput = parseInt(document.getElementById('calorieInput').value);
+
+            if (usernameInput && calorieInput > 0) {
+                localStorage.setItem('user', JSON.stringify({ name: usernameInput, calorieGoal: calorieInput }));
+                userName = usernameInput;
+                calorieGoal = calorieInput;
+                userSignedIn = true;
+                document.getElementById('userName').textContent = userName;
+                document.getElementById('authModal').classList.remove('active');
                 updateCalories();
             }
         }
@@ -220,14 +232,9 @@
 
             document.getElementById('remainingCalories').textContent = remainingCalories;
             document.getElementById('totalCalories').textContent = calorieGoal;
+            document.documentElement.style.setProperty('--progress', `${((calorieGoal - remainingCalories) / calorieGoal) * 100}%`);
 
-            document.documentElement.style.setProperty('--progress', ((calorieGoal - remainingCalories) / calorieGoal) * 100 + '%');
-
-            updateNutrientBreakdown();
-        }
-
-        // Function to update nutrient breakdown
-        function updateNutrientBreakdown() {
+            // Update nutrient breakdown
             let proteinTotal = 0, fatTotal = 0, carbsTotal = 0;
             meals.forEach(meal => {
                 proteinTotal += meal.protein;
@@ -237,60 +244,70 @@
             document.getElementById('proteinTotal').textContent = `${proteinTotal}g`;
             document.getElementById('fatTotal').textContent = `${fatTotal}g`;
             document.getElementById('carbsTotal').textContent = `${carbsTotal}g`;
+
+            // Update progress chart
+            updateProgressChart();
         }
 
-        // Function to display meals
-        function displayMeals(mealsToDisplay) {
-            const mealsContainer = document.getElementById('mealsContainer');
-            mealsContainer.innerHTML = '';
-            mealsToDisplay.forEach(meal => {
+        // Function to display meals based on filters
+        function displayMeals(mealsList) {
+            const mealContainer = document.getElementById('mealsContainer');
+            mealContainer.innerHTML = '';
+
+            mealsList.forEach(meal => {
                 const mealCard = document.createElement('div');
-                mealCard.className = 'meal-card glass-effect p-4 rounded-lg text-center';
+                mealCard.classList.add('meal-card', 'glass-effect', 'p-4', 'rounded-lg');
                 mealCard.innerHTML = `
-                    <h3 class="text-xl font-bold">${meal.name}</h3>
-                    <p class="text-gray-400 mt-2">${meal.calories} calories</p>
-                    <p class="text-gray-400">${meal.protein}g Protein, ${meal.fat}g Fat, ${meal.carbs}g Carbs</p>
-                    <button class="button mt-4" onclick="saveMeal('${meal.name}', ${meal.calories}, '${meal.type}')">Save Meal</button>
+                    <h3 class="text-lg font-bold">${meal.name}</h3>
+                    <p class="text-gray-400">Calories: ${meal.calories}</p>
+                    <p class="text-gray-400">Protein: ${meal.protein}g</p>
+                    <p class="text-gray-400">Fat: ${meal.fat}g</p>
+                    <p class="text-gray-400">Carbs: ${meal.carbs}g</p>
+                    <button class="button mt-4" onclick="addMeal('${meal.name}', ${meal.calories}, ${meal.protein}, ${meal.fat}, ${meal.carbs})">Add Meal</button>
                 `;
-                mealsContainer.appendChild(mealCard);
+                mealContainer.appendChild(mealCard);
             });
         }
 
-        // Function to save a meal to saved meals
-        function saveMeal(name, calories, type) {
+        // Function to add a meal to the tracker
+        function addMeal(name, calories, protein, fat, carbs) {
+            meals.push({ name, calories, protein, fat, carbs });
+            updateCalories();
+            displaySavedMeals();
+        }
+
+        // Function to display saved meals
+        function displaySavedMeals() {
             const savedMealsContainer = document.getElementById('savedMealsContainer');
-            savedMealsContainer.innerHTML += `
-                <div class="glass-effect p-4 rounded-lg text-center mb-4">
-                    <h3 class="text-xl font-bold">${name}</h3>
-                    <p class="text-gray-400">${calories} calories</p>
-                    <button class="button mt-2" onclick="removeMeal('${name}')">Remove</button>
-                </div>
-            `;
-            updateCalories(); // Re-calculate remaining calories
+            savedMealsContainer.innerHTML = '';
+
+            meals.forEach(meal => {
+                const mealCard = document.createElement('div');
+                mealCard.classList.add('meal-card', 'glass-effect', 'p-4', 'rounded-lg', 'mb-4');
+                mealCard.innerHTML = `
+                    <h3 class="text-lg font-bold">${meal.name}</h3>
+                    <p class="text-gray-400">Calories: ${meal.calories}</p>
+                    <p class="text-gray-400">Protein: ${meal.protein}g</p>
+                    <p class="text-gray-400">Fat: ${meal.fat}g</p>
+                    <p class="text-gray-400">Carbs: ${meal.carbs}g</p>
+                    <button class="button mt-4" onclick="removeMeal('${meal.name}')">Remove Meal</button>
+                `;
+                savedMealsContainer.appendChild(mealCard);
+            });
         }
 
-        // Function to remove a meal from saved meals
+        // Function to remove a meal from the tracker
         function removeMeal(name) {
-            document.querySelector(`#savedMealsContainer div:contains(${name})`).remove();
-            updateCalories(); // Re-calculate remaining calories
+            meals = meals.filter(meal => meal.name !== name);
+            updateCalories();
+            displaySavedMeals();
         }
 
-        // Function to show privacy policy modal
-        function showPrivacyPolicy() {
-            document.getElementById('privacyModal').classList.add('active');
-        }
-
-        // Function to hide privacy policy modal
-        function hidePrivacyPolicy() {
-            document.getElementById('privacyModal').classList.remove('active');
-        }
-
-        // Function to initialize the progress chart
+        // Function to initialize progress chart
         function initializeProgressChart() {
             const ctx = document.getElementById('progressChart').getContext('2d');
-            const labels = ['Consumed', 'Remaining'];
             const data = {
-                labels: labels,
+                labels: ['Consumed', 'Remaining'],
                 datasets: [{
                     data: [calorieGoal - meals.reduce((acc, meal) => acc + meal.calories, 0), meals.reduce((acc, meal) => acc + meal.calories, 0)],
                     backgroundColor: ['#3b82f6', '#1e1e2f'],
@@ -311,7 +328,41 @@
                 }
             });
         }
-    </script>
 
+        // Function to update progress chart
+        function updateProgressChart() {
+            const ctx = document.getElementById('progressChart').getContext('2d');
+            const data = {
+                labels: ['Consumed', 'Remaining'],
+                datasets: [{
+                    data: [calorieGoal - meals.reduce((acc, meal) => acc + meal.calories, 0), meals.reduce((acc, meal) => acc + meal.calories, 0)],
+                    backgroundColor: ['#3b82f6', '#1e1e2f'],
+                }]
+            };
+
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: data,
+                options: {
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    responsive: true,
+                    maintainAspectRatio: false,
+                }
+            });
+        }
+
+        // Privacy Policy Modal
+        function showPrivacyPolicy() {
+            document.getElementById('privacyModal').classList.add('active');
+        }
+        function hidePrivacyPolicy() {
+            document.getElementById('privacyModal').classList.remove('active');
+        }
+    </script>
 </body>
 </html>
+
