@@ -47,8 +47,8 @@
         }
         .circle {
             position: relative;
-            width: 100px;
-            height: 100px;
+            width: 200px;
+            height: 200px;
             background: conic-gradient(
                 #34d399 0%,
                 #34d399 var(--progress, 0),
@@ -61,18 +61,45 @@
             margin: 0 auto;
         }
         .circle span {
-            font-size: 1.5rem;
+            font-size: 2.5rem;
             font-weight: bold;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        .modal.active {
+            display: flex;
         }
     </style>
 </head>
 <body>
     <!-- Calorie Setup Modal -->
-    <div id="calorieModal" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50">
+    <div id="calorieModal" class="modal">
         <div class="glass-effect p-8 rounded-2xl max-w-md w-full mx-4">
             <h2 class="text-2xl font-bold gradient-text text-center mb-4">Set Your Daily Calorie Goal</h2>
             <input id="calorieInput" type="number" placeholder="Enter calorie goal" class="w-full p-4 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
             <button class="button mt-6 w-full" onclick="setCalorieGoal()">Start Tracking</button>
+        </div>
+    </div>
+
+    <!-- Privacy Policy Modal -->
+    <div id="privacyModal" class="modal">
+        <div class="glass-effect p-8 rounded-2xl max-w-lg w-full mx-4">
+            <h2 class="text-xl font-bold mb-4">Privacy Policy</h2>
+            <p class="text-sm text-gray-400 mb-4">
+                This application is in beta (v.0.0.1). Data collected is not stored, shared, or retained.
+                By using this app, you acknowledge it is provided "as-is" and agree to hold the developers harmless for any issues.
+            </p>
+            <button class="button w-full" onclick="hidePrivacyPolicy()">Close</button>
         </div>
     </div>
 
@@ -86,11 +113,11 @@
     <main class="container mx-auto px-6 py-8">
         <!-- Daily Calories -->
         <div id="calorieTracker" class="glass-effect p-6 rounded-lg mb-8 text-center">
-            <h2 class="text-xl font-bold">Daily Calories Remaining</h2>
+            <h2 class="text-3xl font-bold">Daily Calories Remaining</h2>
             <div class="circle" id="progressCircle">
                 <span id="remainingCalories">--</span>
             </div>
-            <p class="text-gray-400 mt-2">of <span id="totalCalories">--</span> total</p>
+            <p class="text-gray-400 mt-2 text-lg">of <span id="totalCalories">--</span> total</p>
         </div>
 
         <!-- Meals Section -->
@@ -108,22 +135,7 @@
             { name: "Salmon with Quinoa", calories: 450 },
             { name: "Vegetarian Buddha Bowl", calories: 380 },
             { name: "Greek Yogurt Parfait", calories: 280 },
-            { name: "Turkey Club Sandwich", calories: 420 },
-            { name: "Shrimp Stir-Fry", calories: 310 },
-            { name: "Protein Smoothie Bowl", calories: 340 },
-            { name: "Tuna Avocado Toast", calories: 290 },
-            { name: "Chickpea Curry", calories: 380 },
-            { name: "Egg White Omelette", calories: 250 },
-            { name: "Beef Stir-Fry", calories: 440 },
-            { name: "Mediterranean Bowl", calories: 420 },
-            { name: "Protein Pancakes", calories: 320 },
-            { name: "Vegetable Soup", calories: 150 },
-            { name: "Chicken Wrap", calories: 300 },
-            { name: "Caesar Salad", calories: 200 },
-            { name: "Pasta Primavera", calories: 400 },
-            { name: "Vegetable Stir-Fry", calories: 250 },
-            { name: "Grilled Salmon", calories: 500 },
-            { name: "Oatmeal Bowl", calories: 200 }
+            // Add more meals here
         ];
         let calorieGoal = 0, remainingCalories = 0;
 
@@ -168,6 +180,14 @@
             } else {
                 alert("Calorie limit exceeded!");
             }
+        }
+
+        function showPrivacyPolicy() {
+            document.getElementById('privacyModal').classList.add('active');
+        }
+
+        function hidePrivacyPolicy() {
+            document.getElementById('privacyModal').classList.remove('active');
         }
 
         document.addEventListener('DOMContentLoaded', () => {
