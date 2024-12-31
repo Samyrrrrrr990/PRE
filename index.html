@@ -9,7 +9,7 @@
     <style>
         body {
             font-family: 'Space Grotesk', sans-serif;
-            background: linear-gradient(135deg, #1e1e2f 0%, #3a3a50 100%);
+            background: linear-gradient(135deg, #1e1e2f, #3a3a50);
             color: white;
         }
         .glass-effect {
@@ -21,7 +21,6 @@
         .gradient-text {
             background: linear-gradient(135deg, #3b82f6, #9333ea, #10b981);
             -webkit-background-clip: text;
-            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
         .button {
@@ -38,27 +37,15 @@
             transform: translateY(-3px);
             opacity: 0.9;
         }
-        .meal-card {
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .meal-card:hover {
-            transform: scale(1.02);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-        }
         .circle {
             position: relative;
             width: 200px;
             height: 200px;
-            background: conic-gradient(
-                #3b82f6 0%,
-                #3b82f6 var(--progress, 0),
-                #1e1e2f var(--progress, 0)
-            );
+            background: conic-gradient(#3b82f6 0%, #1e1e2f 100%);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto;
         }
         .circle span {
             font-size: 2.5rem;
@@ -68,64 +55,51 @@
             height: 10px;
             background: #3b82f6;
         }
-        .report-card {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            padding: 1.5rem;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            margin-top: 2rem;
+        .meal-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .meal-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
         }
     </style>
 </head>
 <body>
 
     <!-- Sign Up / Sign In Modal -->
-    <div id="authModal" class="modal">
-        <div class="glass-effect p-8 rounded-2xl max-w-md w-full">
-            <h2 class="text-2xl font-bold gradient-text text-center mb-4">Sign Up / Sign In</h2>
+    <div id="authModal" class="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div class="glass-effect p-8 rounded-lg max-w-md w-full">
+            <h2 class="text-2xl font-bold gradient-text text-center mb-4">Welcome Back!</h2>
             <div class="mb-4">
                 <input id="usernameInput" type="text" placeholder="Enter your name" class="w-full p-4 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required>
             </div>
             <div class="mb-4">
-                <input id="calorieInput" type="number" placeholder="Enter your calorie goal" class="w-full p-4 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+                <input id="calorieInput" type="number" placeholder="Enter your daily calorie goal" class="w-full p-4 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required>
             </div>
             <button class="button mt-6 w-full" onclick="signUp()">Sign Up / Sign In</button>
         </div>
     </div>
 
-    <!-- Privacy Policy Modal -->
-    <div id="privacyModal" class="modal">
-        <div class="glass-effect p-8 rounded-2xl max-w-lg w-full mx-4">
-            <h2 class="text-xl font-bold mb-4">Privacy Policy</h2>
-            <p class="text-sm text-gray-400 mb-4">
-                This application is in beta (v.0.0.1). Data collected is not stored, shared, or retained.
-                By using this app, you acknowledge it is provided "as-is" and agree to hold the developers harmless for any issues.
-            </p>
-            <button class="button w-full" onclick="hidePrivacyPolicy()">Close</button>
-        </div>
-    </div>
-
-    <!-- Navigation -->
-    <nav class="glass-effect sticky top-0 px-6 py-4 flex justify-between items-center">
+    <!-- Navigation Bar -->
+    <nav class="glass-effect sticky top-0 px-6 py-4 flex justify-between items-center bg-opacity-50 backdrop-blur-lg">
         <h1 class="gradient-text text-2xl font-bold">NutrientDash</h1>
         <button onclick="showPrivacyPolicy()" class="text-sm hover:text-blue-400">Privacy Policy</button>
     </nav>
 
     <!-- Main Content -->
     <main class="container mx-auto px-6 py-8">
-        <!-- User Info Section -->
         <div id="userInfo" class="glass-effect p-6 rounded-lg mb-8 text-center">
-            <h2 class="text-3xl font-bold">Hello, <span id="userName">Guest</span></h2>
+            <h2 class="text-3xl font-bold">Welcome, <span id="userName">Guest</span></h2>
             <p class="text-gray-400 mt-2">Track your meals, macros, and stay on top of your goals!</p>
         </div>
 
-        <!-- Daily Calories -->
+        <!-- Calorie Tracker Section -->
         <div id="calorieTracker" class="glass-effect p-6 rounded-lg mb-8 text-center">
-            <h2 class="text-3xl font-bold">Daily Calories Remaining</h2>
+            <h2 class="text-3xl font-bold">Daily Calorie Tracker</h2>
             <div class="circle" id="progressCircle">
                 <span id="remainingCalories">--</span>
             </div>
-            <p class="text-gray-400 mt-2 text-lg">of <span id="totalCalories">--</span> total</p>
+            <p class="text-gray-400 mt-2">Remaining out of <span id="totalCalories">--</span> calories</p>
         </div>
 
         <!-- Meal Search & Filters -->
@@ -143,25 +117,6 @@
             </div>
         </div>
 
-        <!-- Meal Breakdown & Nutrient Insights -->
-        <div id="mealBreakdown" class="glass-effect p-6 rounded-lg mb-8">
-            <h2 class="text-xl font-bold mb-4">Meal Nutrient Breakdown</h2>
-            <div class="grid grid-cols-2 gap-4">
-                <div class="flex flex-col items-center">
-                    <h3 class="text-lg font-bold">Protein</h3>
-                    <p id="proteinTotal">0g</p>
-                </div>
-                <div class="flex flex-col items-center">
-                    <h3 class="text-lg font-bold">Fat</h3>
-                    <p id="fatTotal">0g</p>
-                </div>
-                <div class="flex flex-col items-center">
-                    <h3 class="text-lg font-bold">Carbs</h3>
-                    <p id="carbsTotal">0g</p>
-                </div>
-            </div>
-        </div>
-
         <!-- Saved Meals Section -->
         <div>
             <h2 class="text-xl font-bold mb-4">Saved Meals</h2>
@@ -170,27 +125,38 @@
             </div>
         </div>
 
-        <!-- Progress Reports -->
-        <div id="progressReport" class="report-card">
-            <h2 class="text-xl font-bold mb-4">Progress Reports</h2>
+        <!-- Progress Report -->
+        <div id="progressReport" class="glass-effect p-6 rounded-lg mt-8">
+            <h2 class="text-xl font-bold mb-4">Progress Report</h2>
             <canvas id="progressChart"></canvas>
         </div>
     </main>
 
+    <!-- Privacy Policy Modal -->
+    <div id="privacyModal" class="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div class="glass-effect p-8 rounded-lg max-w-lg w-full">
+            <h2 class="text-xl font-bold mb-4">Privacy Policy</h2>
+            <p class="text-sm text-gray-400">
+                This app does not store any data. By using this app, you acknowledge it's provided "as-is" and agree to hold the developers harmless for any issues.
+            </p>
+            <button class="button mt-6 w-full" onclick="hidePrivacyPolicy()">Close</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         let meals = [
             { name: "Grilled Chicken Salad", calories: 350, protein: 42, fat: 7, carbs: 10, type: "high-protein" },
             { name: "Salmon with Quinoa", calories: 450, protein: 55, fat: 15, carbs: 5, type: "keto" },
             { name: "Vegetarian Buddha Bowl", calories: 380, protein: 38, fat: 10, carbs: 25, type: "vegetarian" },
             { name: "Greek Yogurt Parfait", calories: 280, protein: 15, fat: 4, carbs: 35, type: "vegetarian" },
-            // Add more meals here
         ];
         let calorieGoal = 0, userName = "Guest", userSignedIn = false;
 
         document.addEventListener('DOMContentLoaded', () => {
-            checkLocalStorage(); // Check if user data is stored in localStorage
-            displayMeals(meals);
-            initializeProgressChart(); // Initialize chart for reports
+            checkLocalStorage(); // Check for user data
+            displayMeals(meals); // Display initial meals
+            initializeProgressChart(); // Initialize progress chart
         });
 
         // Function to check localStorage for user data
@@ -208,7 +174,7 @@
             }
         }
 
-        // Sign up function to store user data in localStorage
+        // Sign up or sign in function
         function signUp() {
             const name = document.getElementById('usernameInput').value.trim();
             const calorieGoalInput = document.getElementById('calorieInput').value.trim();
@@ -224,25 +190,13 @@
             }
         }
 
-        // Function to update calories and progress
+        // Update calorie and progress display
         function updateCalories() {
             document.getElementById('remainingCalories').textContent = calorieGoal - meals.reduce((sum, meal) => sum + meal.calories, 0);
             document.getElementById('totalCalories').textContent = calorieGoal;
             document.documentElement.style.setProperty('--progress', `${((calorieGoal - meals.reduce((sum, meal) => sum + meal.calories, 0)) / calorieGoal) * 100}%`);
 
-            // Update nutrient breakdown
-            let proteinTotal = 0, fatTotal = 0, carbsTotal = 0;
-            meals.forEach(meal => {
-                proteinTotal += meal.protein;
-                fatTotal += meal.fat;
-                carbsTotal += meal.carbs;
-            });
-            document.getElementById('proteinTotal').textContent = `${proteinTotal}g`;
-            document.getElementById('fatTotal').textContent = `${fatTotal}g`;
-            document.getElementById('carbsTotal').textContent = `${carbsTotal}g`;
-
-            // Update progress chart
-            updateProgressChart();
+            updateProgressChart(); // Update progress chart
         }
 
         // Function to display meals based on filters
@@ -299,7 +253,7 @@
             displaySavedMeals();
         }
 
-        // Function to initialize progress chart
+        // Initialize the progress chart
         function initializeProgressChart() {
             const ctx = document.getElementById('progressChart').getContext('2d');
             const data = {
@@ -325,7 +279,7 @@
             });
         }
 
-        // Function to update progress chart
+        // Update the progress chart
         function updateProgressChart() {
             const ctx = document.getElementById('progressChart').getContext('2d');
             const data = {
