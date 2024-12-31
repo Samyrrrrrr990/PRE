@@ -3,28 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Opulence - Meal & Calorie Tracker</title>
+    <title>OPULENCE - Meal Tracker</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Space Grotesk', sans-serif;
-            background: linear-gradient(135deg, #1e1e2f, #3a3a50);
+            background: linear-gradient(135deg, #13151a 0%, #1a1c23 100%);
             color: white;
         }
         .glass-effect {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
         }
         .gradient-text {
-            background: linear-gradient(135deg, #3b82f6, #9333ea, #10b981);
+            background: linear-gradient(135deg, #34d399, #60a5fa, #a78bfa);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
         .button {
-            background: linear-gradient(90deg, #3b82f6, #9333ea);
+            background: linear-gradient(90deg, #34d399, #60a5fa);
             color: white;
             border: none;
             cursor: pointer;
@@ -37,46 +38,57 @@
             transform: translateY(-3px);
             opacity: 0.9;
         }
-        .circle {
-            position: relative;
-            width: 200px;
-            height: 200px;
-            background: conic-gradient(#3b82f6 0%, #1e1e2f 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .circle span {
-            font-size: 2.5rem;
-            font-weight: bold;
-        }
-        .progress-bar {
-            height: 10px;
-            background: #3b82f6;
-        }
         .meal-card {
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
         .meal-card:hover {
             transform: scale(1.02);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        .circle {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            background: conic-gradient(
+                #34d399 0%,
+                #34d399 var(--progress, 0),
+                #1a1c23 var(--progress, 0)
+            );
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+        }
+        .circle span {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        .modal.active {
+            display: flex;
         }
     </style>
 </head>
 <body>
-
     <!-- Sign Up / Sign In Modal -->
-    <div id="authModal" class="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-        <div class="glass-effect p-8 rounded-lg max-w-md w-full">
-            <h2 class="text-2xl font-bold gradient-text text-center mb-4">Welcome to Opulence!</h2>
-            <div class="mb-4">
-                <input id="usernameInput" type="text" placeholder="Enter your name" class="w-full p-4 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required>
-            </div>
-            <div class="mb-4">
-                <input id="calorieInput" type="number" placeholder="Enter your daily calorie goal" class="w-full p-4 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required>
-            </div>
-            <button class="button mt-6 w-full" onclick="signUp()">Sign Up / Sign In</button>
+    <div id="signUpModal" class="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div class="glass-effect p-8 rounded-lg max-w-lg w-full">
+            <h2 class="text-2xl font-bold gradient-text mb-6 text-center">Welcome to OPULENCE</h2>
+            <input id="userNameInput" type="text" placeholder="Enter your name" class="w-full p-4 bg-gray-800 text-white rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+            <input id="calorieInput" type="number" placeholder="Enter calorie goal" class="w-full p-4 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+            <button class="button mt-4 w-full" onclick="signUp()">Sign Up</button>
         </div>
     </div>
 
@@ -90,184 +102,166 @@
             </p>
             <div class="flex justify-between items-center mt-4">
                 <button class="button" onclick="acceptPrivacy()">Accept</button>
-                <button class="button" onclick="rejectPrivacy()">Reject</button>
+                <button class="button" onclick="hidePrivacyPolicy()">Close</button>
             </div>
         </div>
     </div>
 
-    <!-- Navigation Bar -->
-    <nav id="navBar" class="glass-effect sticky top-0 px-6 py-4 flex justify-between items-center bg-opacity-50 backdrop-blur-lg">
-        <h1 class="gradient-text text-2xl font-bold">Opulence</h1>
+    <!-- Navigation -->
+    <nav class="glass-effect sticky top-0 px-6 py-4 flex justify-between items-center">
+        <h1 class="gradient-text text-2xl font-bold">OPULENCE</h1>
         <button onclick="showPrivacyPolicy()" class="text-sm hover:text-blue-400">Privacy Policy</button>
     </nav>
 
     <!-- Main Content -->
-    <main id="mainContent" class="container mx-auto px-6 py-8 hidden">
-        <div id="userInfo" class="glass-effect p-6 rounded-lg mb-8 text-center">
-            <h2 class="text-3xl font-bold">Welcome, <span id="userName">Guest</span></h2>
-            <p class="text-gray-400 mt-2">Track your meals, macros, and stay on top of your goals with Opulence!</p>
-        </div>
-
-        <!-- Calorie Tracker Section -->
+    <main class="container mx-auto px-6 py-8">
+        <!-- Daily Calories -->
         <div id="calorieTracker" class="glass-effect p-6 rounded-lg mb-8 text-center">
-            <h2 class="text-3xl font-bold">Daily Calorie Tracker</h2>
+            <h2 class="text-3xl font-bold">Hello, <span id="userNameDisplay">User</span></h2>
+            <h2 class="text-3xl font-bold">Daily Calories Remaining</h2>
             <div class="circle" id="progressCircle">
                 <span id="remainingCalories">--</span>
             </div>
-            <p class="text-gray-400 mt-2">Remaining out of <span id="totalCalories">--</span> calories</p>
+            <p class="text-gray-400 mt-2 text-lg">of <span id="totalCalories">--</span> total</p>
         </div>
 
-        <!-- Meal Search & Filters -->
+        <!-- Meals Section -->
         <div>
-            <h2 class="text-xl font-bold mb-4">Search & Filter Meals</h2>
-            <input type="text" id="searchInput" placeholder="Search meals..." class="w-full p-4 mb-4 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
-            <select id="dietFilter" class="w-full p-4 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 mb-8">
-                <option value="">All Types</option>
-                <option value="vegetarian">Vegetarian</option>
-                <option value="keto">Keto</option>
-                <option value="high-protein">High Protein</option>
-            </select>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="mealsContainer">
+            <h2 class="text-xl font-bold mb-4">Available Meals</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="mealContainer">
                 <!-- Meals will be dynamically injected here -->
             </div>
         </div>
 
         <!-- Saved Meals Section -->
-        <div>
+        <div class="mt-8">
             <h2 class="text-xl font-bold mb-4">Saved Meals</h2>
-            <div id="savedMealsContainer">
+            <div id="savedMealsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <!-- Saved meals will be dynamically injected here -->
             </div>
         </div>
 
-        <!-- Progress Report -->
-        <div id="progressReport" class="glass-effect p-6 rounded-lg mt-8">
-            <h2 class="text-xl font-bold mb-4">Progress Report</h2>
-            <canvas id="progressChart"></canvas>
+        <!-- Calorie Progress Chart -->
+        <div class="mt-8">
+            <canvas id="progressChart" class="w-full h-64"></canvas>
         </div>
     </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        let meals = [
-            { name: "Grilled Chicken Salad", calories: 350, protein: 42, fat: 7, carbs: 10, type: "high-protein" },
-            { name: "Salmon with Quinoa", calories: 450, protein: 55, fat: 15, carbs: 5, type: "keto" },
-            { name: "Vegetarian Buddha Bowl", calories: 380, protein: 38, fat: 10, carbs: 25, type: "vegetarian" },
-            { name: "Greek Yogurt Parfait", calories: 280, protein: 15, fat: 4, carbs: 35, type: "vegetarian" },
-        ];
-        let calorieGoal = 0, userName = "Guest", userSignedIn = false;
+        let userName = '';
+        let calorieGoal = 0;
+        let meals = [];
+        let userData = {};
 
-        document.addEventListener('DOMContentLoaded', () => {
-            checkLocalStorage(); // Check for user data
-            initializeProgressChart(); // Initialize progress chart
-        });
-
-        // Function to check localStorage for user data
-        function checkLocalStorage() {
-            const user = JSON.parse(localStorage.getItem('user'));
-            if (user) {
-                userName = user.name;
-                calorieGoal = user.calorieGoal;
-                userSignedIn = true;
-                document.getElementById('userName').textContent = userName;
-                document.getElementById('authModal').classList.remove('active');
-                document.getElementById('mainContent').classList.remove('hidden');
-                updateCalories();
-            } else {
-                document.getElementById('authModal').classList.add('active');
-            }
-        }
-
-        // Sign up or sign in function
         function signUp() {
-            const name = document.getElementById('usernameInput').value.trim();
-            const calorieGoalInput = document.getElementById('calorieInput').value.trim();
+            userName = document.getElementById('userNameInput').value;
+            calorieGoal = parseInt(document.getElementById('calorieInput').value) || 0;
 
-            if (name && calorieGoalInput) {
-                calorieGoal = parseInt(calorieGoalInput, 10);
-                userName = name;
-                userSignedIn = true;
-                localStorage.setItem('user', JSON.stringify({ name: userName, calorieGoal: calorieGoal }));
-                document.getElementById('userName').textContent = userName;
-                document.getElementById('authModal').classList.remove('active');
-                document.getElementById('privacyModal').classList.add('active');
+            if (userName && calorieGoal > 0) {
+                userData = { userName, calorieGoal, meals: [] };
+                localStorage.setItem('opulenceUserData', JSON.stringify(userData));
+                hideSignUpModal();
+                showPrivacyPolicy();
+            } else {
+                alert('Please fill in all fields correctly.');
             }
         }
 
-        // Privacy Policy Acceptance
+        function showPrivacyPolicy() {
+            document.getElementById('privacyModal').classList.add('active');
+        }
+
         function acceptPrivacy() {
             document.getElementById('privacyModal').classList.remove('active');
-            document.getElementById('mainContent').classList.remove('hidden');
-            updateCalories();
+            loadUserData();
         }
 
-        function rejectPrivacy() {
-            alert("You must accept the Privacy Policy to continue.");
+        function hidePrivacyPolicy() {
+            document.getElementById('privacyModal').classList.remove('active');
         }
 
-        // Update calorie and progress display
+        function hideSignUpModal() {
+            document.getElementById('signUpModal').style.display = 'none';
+        }
+
+        function loadUserData() {
+            const savedUserData = JSON.parse(localStorage.getItem('opulenceUserData'));
+
+            if (savedUserData) {
+                userData = savedUserData;
+                userName = userData.userName;
+                calorieGoal = userData.calorieGoal;
+                meals = userData.meals;
+
+                document.getElementById('userNameDisplay').textContent = userName;
+                document.getElementById('totalCalories').textContent = calorieGoal;
+
+                updateCalories();
+                displayMeals();
+                displaySavedMeals();
+                initializeProgressChart();
+            }
+        }
+
         function updateCalories() {
-            document.getElementById('remainingCalories').textContent = calorieGoal - meals.reduce((sum, meal) => sum + meal.calories, 0);
-            document.getElementById('totalCalories').textContent = calorieGoal;
-            document.documentElement.style.setProperty('--progress', `${((calorieGoal - meals.reduce((sum, meal) => sum + meal.calories, 0)) / calorieGoal) * 100}%`);
-            updateProgressChart(); // Update progress chart
+            const remainingCalories = calorieGoal - meals.reduce((acc, meal) => acc + meal.calories, 0);
+            document.getElementById('remainingCalories').textContent = remainingCalories;
+
+            const progress = (remainingCalories / calorieGoal) * 100 || 0;
+            document.getElementById('progressCircle').style.setProperty('--progress', `${progress}%`);
         }
 
-        // Function to display meals based on filters
-        function displayMeals(mealsList) {
-            const mealContainer = document.getElementById('mealsContainer');
-            mealContainer.innerHTML = '';
-
-            mealsList.forEach(meal => {
-                const mealCard = document.createElement('div');
-                mealCard.classList.add('meal-card', 'glass-effect', 'p-4', 'rounded-lg');
-                mealCard.innerHTML = `
-                    <h3 class="text-lg font-bold">${meal.name}</h3>
-                    <p class="text-gray-400">Calories: ${meal.calories}</p>
-                    <p class="text-gray-400">Protein: ${meal.protein}g</p>
-                    <p class="text-gray-400">Fat: ${meal.fat}g</p>
-                    <p class="text-gray-400">Carbs: ${meal.carbs}g</p>
-                    <button class="button mt-4" onclick="addMeal('${meal.name}', ${meal.calories})">Add Meal</button>
+        function displayMeals() {
+            const container = document.getElementById('mealContainer');
+            container.innerHTML = '';
+            const mealList = [
+                { name: "Grilled Chicken Salad", calories: 350 },
+                { name: "Salmon with Quinoa", calories: 450 },
+                { name: "Vegetarian Buddha Bowl", calories: 380 },
+                { name: "Greek Yogurt Parfait", calories: 280 },
+                // Add more meals here
+            ];
+            mealList.forEach((meal, index) => {
+                const card = document.createElement('div');
+                card.className = 'meal-card glass-effect p-4 rounded-lg text-center';
+                card.innerHTML = `
+                    <h3 class="font-bold text-lg mb-2">${meal.name}</h3>
+                    <p class="text-gray-400 mb-4">${meal.calories} calories</p>
+                    <button class="button" onclick="addMeal('${meal.name}', ${meal.calories})">Add Meal</button>
                 `;
-                mealContainer.appendChild(mealCard);
+                container.appendChild(card);
             });
         }
 
-        // Add meal to saved meals and update the tracker
         function addMeal(name, calories) {
-            meals.push(meals.find(meal => meal.name === name));
+            meals.push({ name, calories });
             updateCalories();
             displaySavedMeals();
+            saveUserData();
         }
 
-        // Display saved meals
+        function removeMeal(name) {
+            meals = meals.filter(meal => meal.name !== name);
+            updateCalories();
+            displaySavedMeals();
+            saveUserData();
+        }
+
         function displaySavedMeals() {
             const savedMealsContainer = document.getElementById('savedMealsContainer');
             savedMealsContainer.innerHTML = '';
-
             meals.forEach(meal => {
                 const mealCard = document.createElement('div');
-                mealCard.classList.add('meal-card', 'glass-effect', 'p-4', 'rounded-lg', 'mb-4');
+                mealCard.className = 'meal-card glass-effect p-4 rounded-lg mb-4';
                 mealCard.innerHTML = `
                     <h3 class="text-lg font-bold">${meal.name}</h3>
                     <p class="text-gray-400">Calories: ${meal.calories}</p>
-                    <p class="text-gray-400">Protein: ${meal.protein}g</p>
-                    <p class="text-gray-400">Fat: ${meal.fat}g</p>
-                    <p class="text-gray-400">Carbs: ${meal.carbs}g</p>
                     <button class="button mt-4" onclick="removeMeal('${meal.name}')">Remove Meal</button>
                 `;
                 savedMealsContainer.appendChild(mealCard);
             });
         }
 
-        // Remove a meal from the tracker
-        function removeMeal(name) {
-            meals = meals.filter(meal => meal.name !== name);
-            updateCalories();
-            displaySavedMeals();
-        }
-
-        // Initialize the progress chart
         function initializeProgressChart() {
             const ctx = document.getElementById('progressChart').getContext('2d');
             const data = {
@@ -293,41 +287,18 @@
             });
         }
 
-        // Update the progress chart
-        function updateProgressChart() {
-            const ctx = document.getElementById('progressChart').getContext('2d');
-            const data = {
-                labels: ['Consumed', 'Remaining'],
-                datasets: [{
-                    data: [calorieGoal - meals.reduce((acc, meal) => acc + meal.calories, 0), meals.reduce((acc, meal) => acc + meal.calories, 0)],
-                    backgroundColor: ['#3b82f6', '#1e1e2f'],
-                }]
-            };
-
-            new Chart(ctx, {
-                type: 'doughnut',
-                data: data,
-                options: {
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    responsive: true,
-                    maintainAspectRatio: false,
-                }
-            });
+        function saveUserData() {
+            localStorage.setItem('opulenceUserData', JSON.stringify(userData));
         }
 
-        // Privacy Policy Modal functions
-        function showPrivacyPolicy() {
-            document.getElementById('privacyModal').classList.add('active');
-        }
-
-        function hidePrivacyPolicy() {
-            document.getElementById('privacyModal').classList.remove('active');
-        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedUserData = JSON.parse(localStorage.getItem('opulenceUserData'));
+            if (!savedUserData) {
+                document.getElementById('signUpModal').style.display = 'flex';
+            } else {
+                loadUserData();
+            }
+        });
     </script>
-
 </body>
 </html>
