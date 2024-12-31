@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NutrientDash - Meal & Calorie Tracker</title>
+    <title>Opulence - Meal & Calorie Tracker</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600&display=swap" rel="stylesheet">
     <style>
@@ -69,7 +69,7 @@
     <!-- Sign Up / Sign In Modal -->
     <div id="authModal" class="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
         <div class="glass-effect p-8 rounded-lg max-w-md w-full">
-            <h2 class="text-2xl font-bold gradient-text text-center mb-4">Welcome Back!</h2>
+            <h2 class="text-2xl font-bold gradient-text text-center mb-4">Welcome to Opulence!</h2>
             <div class="mb-4">
                 <input id="usernameInput" type="text" placeholder="Enter your name" class="w-full p-4 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required>
             </div>
@@ -80,17 +80,32 @@
         </div>
     </div>
 
+    <!-- Privacy Policy Modal -->
+    <div id="privacyModal" class="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+        <div class="glass-effect p-8 rounded-lg max-w-lg w-full">
+            <h2 class="text-xl font-bold mb-4">Privacy Policy</h2>
+            <p class="text-sm text-gray-400">
+                By using this app, you agree to our Privacy Policy. This app does not store any data. 
+                We are committed to your privacy and security.
+            </p>
+            <div class="flex justify-between items-center mt-4">
+                <button class="button" onclick="acceptPrivacy()">Accept</button>
+                <button class="button" onclick="rejectPrivacy()">Reject</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Navigation Bar -->
-    <nav class="glass-effect sticky top-0 px-6 py-4 flex justify-between items-center bg-opacity-50 backdrop-blur-lg">
-        <h1 class="gradient-text text-2xl font-bold">NutrientDash</h1>
+    <nav id="navBar" class="glass-effect sticky top-0 px-6 py-4 flex justify-between items-center bg-opacity-50 backdrop-blur-lg">
+        <h1 class="gradient-text text-2xl font-bold">Opulence</h1>
         <button onclick="showPrivacyPolicy()" class="text-sm hover:text-blue-400">Privacy Policy</button>
     </nav>
 
     <!-- Main Content -->
-    <main class="container mx-auto px-6 py-8">
+    <main id="mainContent" class="container mx-auto px-6 py-8 hidden">
         <div id="userInfo" class="glass-effect p-6 rounded-lg mb-8 text-center">
             <h2 class="text-3xl font-bold">Welcome, <span id="userName">Guest</span></h2>
-            <p class="text-gray-400 mt-2">Track your meals, macros, and stay on top of your goals!</p>
+            <p class="text-gray-400 mt-2">Track your meals, macros, and stay on top of your goals with Opulence!</p>
         </div>
 
         <!-- Calorie Tracker Section -->
@@ -132,17 +147,6 @@
         </div>
     </main>
 
-    <!-- Privacy Policy Modal -->
-    <div id="privacyModal" class="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-        <div class="glass-effect p-8 rounded-lg max-w-lg w-full">
-            <h2 class="text-xl font-bold mb-4">Privacy Policy</h2>
-            <p class="text-sm text-gray-400">
-                This app does not store any data. By using this app, you acknowledge it's provided "as-is" and agree to hold the developers harmless for any issues.
-            </p>
-            <button class="button mt-6 w-full" onclick="hidePrivacyPolicy()">Close</button>
-        </div>
-    </div>
-
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         let meals = [
@@ -155,7 +159,6 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             checkLocalStorage(); // Check for user data
-            displayMeals(meals); // Display initial meals
             initializeProgressChart(); // Initialize progress chart
         });
 
@@ -168,6 +171,7 @@
                 userSignedIn = true;
                 document.getElementById('userName').textContent = userName;
                 document.getElementById('authModal').classList.remove('active');
+                document.getElementById('mainContent').classList.remove('hidden');
                 updateCalories();
             } else {
                 document.getElementById('authModal').classList.add('active');
@@ -186,8 +190,19 @@
                 localStorage.setItem('user', JSON.stringify({ name: userName, calorieGoal: calorieGoal }));
                 document.getElementById('userName').textContent = userName;
                 document.getElementById('authModal').classList.remove('active');
-                updateCalories();
+                document.getElementById('privacyModal').classList.add('active');
             }
+        }
+
+        // Privacy Policy Acceptance
+        function acceptPrivacy() {
+            document.getElementById('privacyModal').classList.remove('active');
+            document.getElementById('mainContent').classList.remove('hidden');
+            updateCalories();
+        }
+
+        function rejectPrivacy() {
+            alert("You must accept the Privacy Policy to continue.");
         }
 
         // Update calorie and progress display
@@ -195,7 +210,6 @@
             document.getElementById('remainingCalories').textContent = calorieGoal - meals.reduce((sum, meal) => sum + meal.calories, 0);
             document.getElementById('totalCalories').textContent = calorieGoal;
             document.documentElement.style.setProperty('--progress', `${((calorieGoal - meals.reduce((sum, meal) => sum + meal.calories, 0)) / calorieGoal) * 100}%`);
-
             updateProgressChart(); // Update progress chart
         }
 
@@ -213,20 +227,20 @@
                     <p class="text-gray-400">Protein: ${meal.protein}g</p>
                     <p class="text-gray-400">Fat: ${meal.fat}g</p>
                     <p class="text-gray-400">Carbs: ${meal.carbs}g</p>
-                    <button class="button mt-4" onclick="addMeal('${meal.name}', ${meal.calories}, ${meal.protein}, ${meal.fat}, ${meal.carbs})">Add Meal</button>
+                    <button class="button mt-4" onclick="addMeal('${meal.name}', ${meal.calories})">Add Meal</button>
                 `;
                 mealContainer.appendChild(mealCard);
             });
         }
 
-        // Function to add a meal to the tracker
-        function addMeal(name, calories, protein, fat, carbs) {
-            meals.push({ name, calories, protein, fat, carbs });
+        // Add meal to saved meals and update the tracker
+        function addMeal(name, calories) {
+            meals.push(meals.find(meal => meal.name === name));
             updateCalories();
             displaySavedMeals();
         }
 
-        // Function to display saved meals
+        // Display saved meals
         function displaySavedMeals() {
             const savedMealsContainer = document.getElementById('savedMealsContainer');
             savedMealsContainer.innerHTML = '';
@@ -246,7 +260,7 @@
             });
         }
 
-        // Function to remove a meal from the tracker
+        // Remove a meal from the tracker
         function removeMeal(name) {
             meals = meals.filter(meal => meal.name !== name);
             updateCalories();
@@ -309,9 +323,11 @@
         function showPrivacyPolicy() {
             document.getElementById('privacyModal').classList.add('active');
         }
+
         function hidePrivacyPolicy() {
             document.getElementById('privacyModal').classList.remove('active');
         }
     </script>
+
 </body>
 </html>
