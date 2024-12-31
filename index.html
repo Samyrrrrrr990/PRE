@@ -79,51 +79,18 @@
         .modal.active {
             display: flex;
         }
-        .loading-spinner {
-            display: none;
-            border: 4px solid transparent;
-            border-top: 4px solid white;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            margin: 0 auto;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            from {
-                transform: rotate(0deg);
-            }
-            to {
-                transform: rotate(360deg);
-            }
-        }
-        .filter-section {
-            margin-bottom: 4rem;
-        }
-        .filter-section label {
-            font-weight: bold;
-            margin-right: 1rem;
-        }
-        .filter-section select, 
-        .filter-section input {
-            padding: 0.75rem;
-            border-radius: 8px;
-            background-color: #333;
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            margin-bottom: 1rem;
-            width: 100%;
-        }
         .no-meals {
-            text-align: center;
-            color: gray;
+            color: white;
+            font-size: 1.2rem;
+            margin-top: 2rem;
         }
     </style>
 </head>
 <body>
+
     <!-- Calorie Setup Modal -->
     <div id="calorieModal" class="modal">
-        <div class="glass-effect p-8 rounded-2xl max-w-md w-full mx-4">
+        <div class="glass-effect p-8 rounded-2xl max-w-md w-full">
             <h2 class="text-2xl font-bold gradient-text text-center mb-4">Set Your Daily Calorie Goal</h2>
             <input id="calorieInput" type="number" placeholder="Enter calorie goal" class="w-full p-4 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
             <button class="button mt-6 w-full" onclick="setCalorieGoal()">Start Tracking</button>
@@ -150,7 +117,13 @@
 
     <!-- Main Content -->
     <main class="container mx-auto px-6 py-8">
-        <!-- Calorie Tracker Section -->
+        <!-- User Info Section -->
+        <div id="userInfo" class="glass-effect p-6 rounded-lg mb-8 text-center">
+            <h2 class="text-3xl font-bold">Hello, <span id="userName">Guest</span></h2>
+            <p class="text-gray-400 mt-2">Track your meals, calories, and stay on top of your goals!</p>
+        </div>
+
+        <!-- Daily Calories -->
         <div id="calorieTracker" class="glass-effect p-6 rounded-lg mb-8 text-center">
             <h2 class="text-3xl font-bold">Daily Calories Remaining</h2>
             <div class="circle" id="progressCircle">
@@ -159,150 +132,124 @@
             <p class="text-gray-400 mt-2 text-lg">of <span id="totalCalories">--</span> total</p>
         </div>
 
-        <!-- Filter Section -->
-        <div class="glass-effect p-6 rounded-lg mb-8">
-            <h2 class="text-xl font-bold mb-4">Filter Meals</h2>
-            <div class="filter-section">
-                <label for="dietFilter">Filter by Diet</label>
-                <select id="dietFilter">
-                    <option value="">All</option>
-                    <option value="vegetarian">Vegetarian</option>
-                    <option value="keto">Keto</option>
-                    <option value="high-protein">High Protein</option>
-                </select>
-            </div>
-            <input id="searchInput" type="text" placeholder="Search meals..." class="w-full p-4 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
-        </div>
-
         <!-- Meals Section -->
         <div>
             <h2 class="text-xl font-bold mb-4">Available Meals</h2>
-            <div id="mealsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <input type="text" id="searchInput" placeholder="Search meals..." class="w-full p-4 mb-4 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
+            <select id="dietFilter" class="w-full p-4 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 mb-8">
+                <option value="">All Types</option>
+                <option value="vegetarian">Vegetarian</option>
+                <option value="keto">Keto</option>
+                <option value="high-protein">High Protein</option>
+            </select>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="mealsContainer">
                 <!-- Meals will be dynamically injected here -->
             </div>
         </div>
 
         <!-- Saved Meals Section -->
         <div>
-            <h2 class="text-xl font-bold mt-8 mb-4">Saved Meals</h2>
-            <div id="savedMealsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <!-- Saved meals will be displayed here -->
+            <h2 class="text-xl font-bold mb-4">Saved Meals</h2>
+            <div id="savedMealsContainer">
+                <!-- Saved meals will be dynamically injected here -->
             </div>
         </div>
     </main>
 
-    <div class="loading-spinner" id="loadingSpinner"></div>
-
     <script>
         let meals = [
-            { name: "Grilled Chicken Salad", calories: 350, type: "high-protein" },
-            { name: "Salmon with Quinoa", calories: 450, type: "keto" },
-            { name: "Vegetarian Buddha Bowl", calories: 380, type: "vegetarian" },
-            { name: "Greek Yogurt Parfait", calories: 280, type: "high-protein" },
+            { name: "Grilled Chicken Salad", calories: 350, type: "high-protein", protein: 42, fat: 7, carbs: 10 },
+            { name: "Salmon with Quinoa", calories: 450, type: "keto", protein: 55, fat: 15, carbs: 5 },
+            { name: "Vegetarian Buddha Bowl", calories: 380, type: "vegetarian", protein: 38, fat: 10, carbs: 25 },
+            { name: "Greek Yogurt Parfait", calories: 280, type: "vegetarian", protein: 15, fat: 4, carbs: 35 },
             // Add more meals here
         ];
-        let calorieGoal = 0, remainingCalories = 0, savedMeals = [];
+        let calorieGoal = 0, userName = "Guest";
 
+        document.addEventListener('DOMContentLoaded', () => {
+            checkLocalStorage(); // Check if user data is stored in localStorage
+            displayMeals(meals);
+        });
+
+        // Function to check localStorage for user data
+        function checkLocalStorage() {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (user) {
+                userName = user.name;
+                calorieGoal = user.calorieGoal;
+                document.getElementById('userName').textContent = userName;
+                document.getElementById('calorieModal').classList.remove('active');
+                updateCalories();
+            } else {
+                document.getElementById('calorieModal').classList.add('active');
+            }
+        }
+
+        // Function to set daily calorie goal
         function setCalorieGoal() {
-            calorieGoal = parseInt(document.getElementById('calorieInput').value) || 0;
-            if (calorieGoal > 0) {
-                remainingCalories = calorieGoal;
+            const calorieInput = document.getElementById('calorieInput').value;
+            if (calorieInput > 0) {
+                localStorage.setItem('user', JSON.stringify({ name: userName, calorieGoal: parseInt(calorieInput) }));
+                calorieGoal = parseInt(calorieInput);
+                document.getElementById('calorieModal').classList.remove('active');
                 updateCalories();
-                document.getElementById('calorieModal').style.display = 'none';
-                displayMeals();
             }
         }
 
+        // Function to update calories and progress
         function updateCalories() {
-            document.getElementById('remainingCalories').innerText = remainingCalories;
-            document.getElementById('totalCalories').innerText = calorieGoal;
-
-            const progress = (remainingCalories / calorieGoal) * 100 || 0;
-            document.getElementById('progressCircle').style.setProperty('--progress', `${progress}%`);
+            const remainingCalories = calorieGoal - meals.reduce((acc, meal) => acc + meal.calories, 0);
+            document.getElementById('remainingCalories').textContent = remainingCalories;
+            document.getElementById('totalCalories').textContent = calorieGoal;
+            document.documentElement.style.setProperty('--progress', ((calorieGoal - remainingCalories) / calorieGoal) * 100 + '%');
         }
 
-        function displayMeals(filteredMeals = meals) {
-            const container = document.getElementById('mealsContainer');
-            container.innerHTML = '';
-            if (filteredMeals.length === 0) {
-                container.innerHTML = `<p class="no-meals">No meals found!</p>`;
-            } else {
-                filteredMeals.forEach((meal, index) => {
-                    const card = document.createElement('div');
-                    card.className = 'meal-card glass-effect p-4 rounded-lg text-center';
-                    card.innerHTML = `
-                        <h3 class="font-bold text-lg mb-2">${meal.name}</h3>
-                        <p class="text-gray-400 mb-4">${meal.calories} calories</p>
-                        <button class="button" onclick="addMeal(${meal.calories}, ${index})" ${remainingCalories < meal.calories ? 'disabled' : ''}>Add Meal</button>
-                    `;
-                    container.appendChild(card);
-                });
-            }
-        }
-
-        function addMeal(calories, index) {
-            if (remainingCalories >= calories) {
-                remainingCalories -= calories;
-                updateCalories();
-                displayMeals(); // Refresh the meal list
-            } else {
-                alert("Calorie limit exceeded!");
-            }
-        }
-
-        function filterMeals() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            const dietFilter = document.getElementById('dietFilter').value;
-            let filtered = meals.filter(meal => meal.name.toLowerCase().includes(query));
-
-            if (dietFilter) {
-                filtered = filtered.filter(meal => meal.type === dietFilter);
-            }
-
-            displayMeals(filtered);
-        }
-
-        function saveMeal(meal) {
-            savedMeals.push(meal);
-            displaySavedMeals();
-        }
-
-        function displaySavedMeals() {
-            const container = document.getElementById('savedMealsContainer');
-            container.innerHTML = '';
-            savedMeals.forEach((meal, index) => {
-                const card = document.createElement('div');
-                card.className = 'meal-card glass-effect p-4 rounded-lg text-center';
-                card.innerHTML = `
-                    <h3 class="font-bold text-lg mb-2">${meal.name}</h3>
-                    <p class="text-gray-400 mb-4">${meal.calories} calories</p>
-                    <button class="button" onclick="removeSavedMeal(${index})">Remove</button>
+        // Function to display meals
+        function displayMeals(mealsToDisplay) {
+            const mealsContainer = document.getElementById('mealsContainer');
+            mealsContainer.innerHTML = '';
+            mealsToDisplay.forEach(meal => {
+                const mealCard = document.createElement('div');
+                mealCard.className = 'meal-card glass-effect p-4 rounded-lg text-center';
+                mealCard.innerHTML = `
+                    <h3 class="text-xl font-bold">${meal.name}</h3>
+                    <p class="text-gray-400 mt-2">${meal.calories} calories</p>
+                    <p class="text-gray-400">${meal.protein}g Protein, ${meal.fat}g Fat, ${meal.carbs}g Carbs</p>
+                    <button class="button mt-4" onclick="saveMeal('${meal.name}', ${meal.calories}, '${meal.type}')">Save Meal</button>
                 `;
-                container.appendChild(card);
+                mealsContainer.appendChild(mealCard);
             });
         }
 
-        function removeSavedMeal(index) {
-            savedMeals.splice(index, 1);
-            displaySavedMeals();
+        // Function to save a meal to saved meals
+        function saveMeal(name, calories, type) {
+            const savedMealsContainer = document.getElementById('savedMealsContainer');
+            savedMealsContainer.innerHTML += `
+                <div class="glass-effect p-4 rounded-lg text-center mb-4">
+                    <h3 class="text-xl font-bold">${name}</h3>
+                    <p class="text-gray-400">${calories} calories</p>
+                    <button class="button mt-2" onclick="removeMeal('${name}')">Remove</button>
+                </div>
+            `;
+            updateCalories(); // Re-calculate remaining calories
         }
 
+        // Function to remove a meal from saved meals
+        function removeMeal(name) {
+            document.querySelector(`#savedMealsContainer div:contains(${name})`).remove();
+            updateCalories(); // Re-calculate remaining calories
+        }
+
+        // Function to show privacy policy modal
         function showPrivacyPolicy() {
             document.getElementById('privacyModal').classList.add('active');
         }
 
+        // Function to hide privacy policy modal
         function hidePrivacyPolicy() {
             document.getElementById('privacyModal').classList.remove('active');
         }
-
-        // Search input event listener
-        document.getElementById('searchInput').addEventListener('input', filterMeals);
-        document.getElementById('dietFilter').addEventListener('change', filterMeals);
-
-        // Loading spinner
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('calorieModal').style.display = 'block';
-        });
     </script>
+
 </body>
 </html>
