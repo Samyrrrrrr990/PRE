@@ -89,6 +89,23 @@
             height: 300px;
             background: rgba(255, 255, 255, 0.1);
         }
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+        }
+        .nav-lines {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            cursor: pointer;
+        }
+        .nav-lines div {
+            width: 24px;
+            height: 2px;
+            background-color: white;
+        }
     </style>
 </head>
 <body>
@@ -115,8 +132,15 @@
     </div>
 
     <!-- Navigation -->
-    <nav class="glass-effect sticky top-0 px-6 py-4 flex justify-between items-center">
-        <h1 class="gradient-text text-2xl font-bold">OPULENCE</h1>
+    <nav class="glass-effect sticky top-0 px-6 py-4">
+        <div class="flex items-center gap-4">
+            <div class="nav-lines">
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+            <h1 class="gradient-text text-2xl font-bold">OPULENCE</h1>
+        </div>
         <button onclick="showPrivacyPolicy()" class="text-sm hover:text-blue-400">Privacy Policy</button>
     </nav>
 
@@ -281,7 +305,29 @@
         function hidePrivacyPolicy() {
             document.getElementById('privacyModal').classList.remove('active');
         }
-    </script>
 
+        // Function to save a meal
+        function saveMeal(name, calories, type) {
+            const savedMealsContainer = document.getElementById('savedMealsContainer');
+            const mealCard = document.createElement('div');
+            mealCard.className = 'glass-effect p-4 rounded-lg text-center mb-4';
+            mealCard.innerHTML = `
+                <h3 class="text-xl font-bold">${name}</h3>
+                <p class="text-gray-400">${calories} calories</p>
+                <button class="button mt-4" onclick="removeMeal('${name}')">Remove Meal</button>
+            `;
+            savedMealsContainer.appendChild(mealCard);
+        }
+
+        // Function to remove a saved meal
+        function removeMeal(name) {
+            const savedMealsContainer = document.getElementById('savedMealsContainer');
+            savedMealsContainer.querySelectorAll(`:scope > div`).forEach(mealCard => {
+                if (mealCard.querySelector('h3').textContent === name) {
+                    savedMealsContainer.removeChild(mealCard);
+                }
+            });
+        }
+    </script>
 </body>
 </html>
