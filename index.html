@@ -89,10 +89,6 @@
             height: 300px;
             background: rgba(255, 255, 255, 0.1);
         }
-        nav .nav-links {
-            display: flex;
-            gap: 1.5rem;
-        }
     </style>
 </head>
 <body>
@@ -120,11 +116,6 @@
 
     <!-- Navigation -->
     <nav class="glass-effect sticky top-0 px-6 py-4 flex justify-between items-center">
-        <div class="nav-links">
-            <div class="w-8 h-1 bg-white rounded-full"></div>
-            <div class="w-8 h-1 bg-white rounded-full"></div>
-            <div class="w-8 h-1 bg-white rounded-full"></div>
-        </div>
         <h1 class="gradient-text text-2xl font-bold">OPULENCE</h1>
         <button onclick="showPrivacyPolicy()" class="text-sm hover:text-blue-400">Privacy Policy</button>
     </nav>
@@ -290,40 +281,11 @@
         function hidePrivacyPolicy() {
             document.getElementById('privacyModal').classList.remove('active');
         }
-
-        // Function to save meal to saved meals
-        function saveMeal(name, calories, type) {
-            const savedMealsContainer = document.getElementById('savedMealsContainer');
-            const mealIndex = meals.findIndex(meal => meal.name === name);
-            if (mealIndex >= 0) {
-                meals.splice(mealIndex, 1);
-            }
-            savedMealsContainer.innerHTML += `
-                <div class="meal-card glass-effect p-4 rounded-lg text-center">
-                    <h3 class="text-xl font-bold">${name}</h3>
-                    <p class="text-gray-400 mt-2">${calories} calories</p>
-                    <p class="text-gray-400">Type: ${type}</p>
-                </div>
-            `;
-        }
-
-        // Function to search and filter meals
-        document.getElementById('searchInput').addEventListener('input', filterMeals);
-        document.getElementById('dietFilter').addEventListener('change', filterMeals);
-
-        function filterMeals() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            const diet = document.getElementById('dietFilter').value;
-            const filteredMeals = meals.filter(meal => {
-                return meal.name.toLowerCase().includes(query) &&
-                       (diet === '' || meal.type === diet);
-            });
-            displayMeals(filteredMeals);
-        }
     </script>
 
 </body>
 </html>
+
 
         }
     </script>
