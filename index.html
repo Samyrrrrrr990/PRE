@@ -84,14 +84,25 @@
             font-size: 1.2rem;
             margin-top: 2rem;
         }
-        .graph-container {
-            width: 100%;
-            height: 300px;
-            background: rgba(255, 255, 255, 0.1);
+        .theme-toggle {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #1a1c23;
+            padding: 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .theme-toggle:hover {
+            background: #2b2d35;
         }
     </style>
 </head>
 <body>
+
+    <!-- Theme Toggle -->
+    <div class="theme-toggle" onclick="toggleTheme()">🌙 / 🌞</div>
 
     <!-- Calorie Setup Modal -->
     <div id="calorieModal" class="modal">
@@ -137,24 +148,9 @@
             <p class="text-gray-400 mt-2 text-lg">of <span id="totalCalories">--</span> total</p>
         </div>
 
-        <!-- Meal Recommendations Section -->
-        <div id="mealRecommendations" class="glass-effect p-6 rounded-lg mb-8">
-            <h2 class="text-xl font-bold mb-4">Meal Recommendations</h2>
-            <p class="text-gray-400 mb-4">Based on your preferences, here are some recommended meals:</p>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="recommendationsContainer">
-                <!-- Recommended meals will be displayed here -->
-            </div>
-        </div>
-
-        <!-- Analytics Section -->
-        <div id="analyticsSection" class="glass-effect p-6 rounded-lg mb-8">
-            <h2 class="text-xl font-bold mb-4">Calorie Consumption Analytics</h2>
-            <div class="graph-container" id="calorieGraph"></div>
-        </div>
-
-        <!-- Meals Section -->
+        <!-- Meal Suggestions Section -->
         <div>
-            <h2 class="text-xl font-bold mb-4">Available Meals</h2>
+            <h2 class="text-xl font-bold mb-4">Suggested Meals for You</h2>
             <input type="text" id="searchInput" placeholder="Search meals..." class="w-full p-4 mb-4 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
             <select id="dietFilter" class="w-full p-4 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 mb-8">
                 <option value="">All Types</option>
@@ -174,6 +170,15 @@
                 <!-- Saved meals will be dynamically injected here -->
             </div>
         </div>
+
+        <!-- Analytics Section -->
+        <div>
+            <h2 class="text-xl font-bold mb-4">Your Nutritional Insights</h2>
+            <div id="nutritionAnalytics">
+                <!-- Charts and Graphs showing progress & nutritional breakdown -->
+            </div>
+        </div>
+
     </main>
 
     <script>
@@ -200,7 +205,6 @@
                 document.getElementById('userName').textContent = userName;
                 document.getElementById('calorieModal').classList.remove('active');
                 updateCalories();
-                generateAnalytics();
             } else {
                 document.getElementById('calorieModal').classList.add('active');
             }
@@ -214,7 +218,6 @@
                 calorieGoal = parseInt(calorieInput);
                 document.getElementById('calorieModal').classList.remove('active');
                 updateCalories();
-                generateAnalytics();
             }
         }
 
@@ -243,33 +246,23 @@
             });
         }
 
-        // Function to generate analytics
-        function generateAnalytics() {
-            const caloriesConsumed = meals.reduce((acc, meal) => acc + meal.calories, 0);
-            const remainingCalories = calorieGoal - caloriesConsumed;
-            const labels = ['Calories Consumed', 'Remaining Calories'];
-            const data = [caloriesConsumed, remainingCalories];
-            const ctx = document.getElementById('calorieGraph').getContext('2d');
-            new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: data,
-                        backgroundColor: ['#34d399', '#1a1c23'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    cutout: '70%',
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    }
-                }
-            });
+        // Function to save a meal to saved meals
+        function saveMeal(name, calories, type) {
+            const savedMealsContainer = document.getElementById('savedMealsContainer');
+            savedMealsContainer.innerHTML += `
+                <div class="glass-effect p-4 rounded-lg text-center mb-4">
+                    <h3 class="text-xl font-bold">${name}</h3>
+                    <p class="text-gray-400">${calories} calories</p>
+                    <button class="button mt-2" onclick="removeMeal('${name}')">Remove</button>
+                </div>
+            `;
+            updateCalories(); // Re-calculate remaining calories
+        }
+
+        // Function to remove a meal from saved meals
+        function removeMeal(name) {
+            document.querySelector(`#savedMealsContainer div:contains(${name})`).remove();
+            updateCalories(); // Re-calculate remaining calories
         }
 
         // Function to show privacy policy modal
@@ -281,10 +274,18 @@
         function hidePrivacyPolicy() {
             document.getElementById('privacyModal').classList.remove('active');
         }
+
+        // Theme toggle function
+        function toggleTheme() {
+            document.body.classList.toggle('dark-theme');
+            document.documentElement.style.setProperty('--bg-color', document.body.classList.contains('dark-theme') ? '#1a1c23' : '#ffffff');
+            document.documentElement.style.setProperty('--text-color', document.body.classList.contains('dark-theme') ? '#ffffff' : '#000000');
+        }
     </script>
 
 </body>
 </html>
+
 
 
         }
