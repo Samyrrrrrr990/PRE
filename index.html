@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPULENCE - Meal Tracker</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: linear-gradient(135deg, #13151a 0%, #1a1c23 100%);
+            color: white;
+            overflow-x: hidden;
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #34d399, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .button {
+            background: linear-gradient(90deg, #34d399, #60a5fa);
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .button:hover {
+            transform: translateY(-3px);
+            opacity: 0.9;
+        }
+        .meal-card:hover {
+            transform: scale(1.02);
+        }
+    </style>
+</head>
+<body>
+    <!-- Calorie Setup Modal -->
+    <div id="calorieModal" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50">
+        <div class="glass-effect p-8 rounded-2xl max-w-md w-full mx-4">
+            <h2 class="text-2xl font-bold gradient-text text-center mb-4">Set Your Daily Calorie Goal</h2>
+            <input id="calorieInput" type="number" placeholder="Enter calorie goal" class="w-full p-4 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
+            <button class="button mt-6 w-full" onclick="setCalorieGoal()">Start Tracking</button>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="glass-effect sticky top-0 px-6 py-4 flex justify-between items-center">
+        <h1 class="gradient-text text-2xl font-bold">OPULENCE</h1>
+        <button onclick="showPrivacyPolicy()" class="text-sm hover:text-blue-400">Privacy Policy</button>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-8">
+        <!-- Daily Calories -->
+        <div id="calorieTracker" class="glass-effect p-6 rounded-lg mb-8 text-center">
+            <h2 class="text-xl font-bold">Daily Calories Remaining</h2>
+            <div id="remainingCalories" class="text-4xl font-bold gradient-text">--</div>
+            <p class="text-gray-400">of <span id="totalCalories">--</span> total</p>
+        </div>
+
+        <!-- Meals Section -->
+        <div>
+            <h2 class="text-xl font-bold mb-4">Available Meals</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Meals will be dynamically injected here -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Privacy Policy Modal -->
+    <div id="privacyModal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 hidden">
+        <div class="glass-effect p-8 rounded-2xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+            <h2 class="text-2xl font-bold gradient-text mb-4">Privacy Policy</h2>
+            <p class="text-gray-300 text-sm">
+                This application ("Opulence Meal Tracker") is a beta version and is provided "as is" without any guarantees or warranties. The creators of this application shall not be held liable for any inaccuracies, errors, or outcomes arising from its use. Nutritional information is for demonstration purposes only and should not be relied upon for health-related decisions. User data may not be stored securely as this is a prototype. Use of the application is entirely at your own risk.
+            </p>
+            <button class="button mt-6" onclick="closePrivacyPolicy()">Close</button>
+        </div>
+    </div>
+
+    <script>
+        let meals = [
+            { name: "Grilled Chicken Salad", calories: 350 },
+            { name: "Salmon with Quinoa", calories: 450 },
+            { name: "Vegetarian Buddha Bowl", calories: 380 },
+            { name: "Greek Yogurt Parfait", calories: 280 },
+            { name: "Turkey Club Sandwich", calories: 420 },
+            { name: "Shrimp Stir-Fry", calories: 310 },
+            { name: "Protein Smoothie Bowl", calories: 340 },
+            { name: "Tuna Avocado Toast", calories: 290 },
+            { name: "Chickpea Curry", calories: 380 },
+            { name: "Egg White Omelette", calories: 250 },
+            { name: "Beef Stir-Fry", calories: 440 },
+            { name: "Mediterranean Bowl", calories: 420 },
+            { name: "Protein Pancakes", calories: 320 },
+            { name: "Vegetable Soup", calories: 150 },
+            { name: "Chicken Wrap", calories: 300 },
+            { name: "Caesar Salad", calories: 200 },
+            { name: "Pasta Primavera", calories: 400 },
+            { name: "Vegetable Stir-Fry", calories: 250 },
+            { name: "Grilled Salmon", calories: 500 },
+            { name: "Oatmeal Bowl", calories: 200 }
+        ];
+        let calorieGoal = 0, remainingCalories = 0;
+
+        function setCalorieGoal() {
+            calorieGoal = parseInt(document.getElementById('calorieInput').value) || 0;
+            if (calorieGoal > 0) {
+                remainingCalories = calorieGoal;
+                updateCalories();
+                document.getElementById('calorieModal').style.display = 'none';
+                displayMeals();
+            }
+        }
+
+        function updateCalories() {
+            document.getElementById('remainingCalories').innerText = remainingCalories;
+            document.getElementById('totalCalories').innerText = calorieGoal;
+        }
+
+        function displayMeals() {
+            const container = document.querySelector('main > div > div');
+            container.innerHTML = '';
+            meals.forEach((meal, index) => {
+                const card = document.createElement('div');
+                card.className = 'meal-card glass-effect p-4 rounded-lg text-center';
+                card.innerHTML = `
+                    <h3 class="font-bold text-lg mb-2">${meal.name}</h3>
+                    <p class="text-gray-400 mb-4">${meal.calories} calories</p>
+                    <button class="button" onclick="addMeal(${index})">Add Meal</button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function addMeal(index) {
+            const meal = meals[index];
+            if (remainingCalories - meal.calories >= 0) {
+                remainingCalories -= meal.calories;
+                updateCalories();
+            } else {
+                alert("Calorie limit exceeded!");
+            }
+        }
+
+        function showPrivacyPolicy() {
+            document.getElementById('privacyModal').classList.remove('hidden');
+        }
+
+        function closePrivacyPolicy() {
+            document.getElementById('privacyModal').classList.add('hidden');
+        }
+
+        // Reset on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('calorieModal').style.display = 'flex';
+        });
+    </script>
+</body>
+</html>
