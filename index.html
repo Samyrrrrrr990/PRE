@@ -201,7 +201,6 @@
                 calorieGoal = user.calorieGoal;
                 userSignedIn = true;
                 document.getElementById('userName').textContent = userName;
-                document.getElementById('calorieModal').classList.remove('active');
                 document.getElementById('authModal').classList.remove('active');
                 updateCalories();
             } else {
@@ -209,16 +208,16 @@
             }
         }
 
-        // Function to set daily calorie goal
+        // Sign up function to store user data in localStorage
         function signUp() {
-            const usernameInput = document.getElementById('usernameInput').value;
-            const calorieInput = parseInt(document.getElementById('calorieInput').value);
+            const name = document.getElementById('usernameInput').value.trim();
+            const calorieGoalInput = document.getElementById('calorieInput').value.trim();
 
-            if (usernameInput && calorieInput > 0) {
-                localStorage.setItem('user', JSON.stringify({ name: usernameInput, calorieGoal: calorieInput }));
-                userName = usernameInput;
-                calorieGoal = calorieInput;
+            if (name && calorieGoalInput) {
+                calorieGoal = parseInt(calorieGoalInput, 10);
+                userName = name;
                 userSignedIn = true;
+                localStorage.setItem('user', JSON.stringify({ name: userName, calorieGoal: calorieGoal }));
                 document.getElementById('userName').textContent = userName;
                 document.getElementById('authModal').classList.remove('active');
                 updateCalories();
@@ -227,12 +226,9 @@
 
         // Function to update calories and progress
         function updateCalories() {
-            const consumedCalories = meals.reduce((acc, meal) => acc + meal.calories, 0);
-            const remainingCalories = calorieGoal - consumedCalories;
-
-            document.getElementById('remainingCalories').textContent = remainingCalories;
+            document.getElementById('remainingCalories').textContent = calorieGoal - meals.reduce((sum, meal) => sum + meal.calories, 0);
             document.getElementById('totalCalories').textContent = calorieGoal;
-            document.documentElement.style.setProperty('--progress', `${((calorieGoal - remainingCalories) / calorieGoal) * 100}%`);
+            document.documentElement.style.setProperty('--progress', `${((calorieGoal - meals.reduce((sum, meal) => sum + meal.calories, 0)) / calorieGoal) * 100}%`);
 
             // Update nutrient breakdown
             let proteinTotal = 0, fatTotal = 0, carbsTotal = 0;
@@ -355,7 +351,7 @@
             });
         }
 
-        // Privacy Policy Modal
+        // Privacy Policy Modal functions
         function showPrivacyPolicy() {
             document.getElementById('privacyModal').classList.add('active');
         }
