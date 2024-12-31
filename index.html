@@ -3,29 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OPULENCE - Meal Tracker</title>
+    <title>NutrientDash - Meal & Calorie Tracker</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Space Grotesk', sans-serif;
-            background: linear-gradient(135deg, #13151a 0%, #1a1c23 100%);
+            background: linear-gradient(135deg, #1e1e2f 0%, #3a3a50 100%);
             color: white;
         }
         .glass-effect {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
         }
         .gradient-text {
-            background: linear-gradient(135deg, #34d399, #60a5fa, #a78bfa);
+            background: linear-gradient(135deg, #3b82f6, #9333ea, #10b981);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
         }
         .button {
-            background: linear-gradient(90deg, #34d399, #60a5fa);
+            background: linear-gradient(90deg, #3b82f6, #9333ea);
             color: white;
             border: none;
             cursor: pointer;
@@ -43,16 +43,16 @@
         }
         .meal-card:hover {
             transform: scale(1.02);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
         }
         .circle {
             position: relative;
             width: 200px;
             height: 200px;
             background: conic-gradient(
-                #34d399 0%,
-                #34d399 var(--progress, 0),
-                #1a1c23 var(--progress, 0)
+                #3b82f6 0%,
+                #3b82f6 var(--progress, 0),
+                #1e1e2f var(--progress, 0)
             );
             border-radius: 50%;
             display: flex;
@@ -64,45 +64,20 @@
             font-size: 2.5rem;
             font-weight: bold;
         }
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
+        .progress-bar {
+            height: 10px;
+            background: #3b82f6;
         }
-        .modal.active {
-            display: flex;
-        }
-        .no-meals {
-            color: white;
-            font-size: 1.2rem;
-            margin-top: 2rem;
-        }
-        .theme-toggle {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            background: #1a1c23;
-            padding: 0.5rem;
+        .report-card {
+            background: rgba(255, 255, 255, 0.05);
             border-radius: 8px;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-        .theme-toggle:hover {
-            background: #2b2d35;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            margin-top: 2rem;
         }
     </style>
 </head>
 <body>
-
-    <!-- Theme Toggle -->
-    <div class="theme-toggle" onclick="toggleTheme()">🌙 / 🌞</div>
 
     <!-- Calorie Setup Modal -->
     <div id="calorieModal" class="modal">
@@ -127,7 +102,7 @@
 
     <!-- Navigation -->
     <nav class="glass-effect sticky top-0 px-6 py-4 flex justify-between items-center">
-        <h1 class="gradient-text text-2xl font-bold">OPULENCE</h1>
+        <h1 class="gradient-text text-2xl font-bold">NutrientDash</h1>
         <button onclick="showPrivacyPolicy()" class="text-sm hover:text-blue-400">Privacy Policy</button>
     </nav>
 
@@ -136,7 +111,7 @@
         <!-- User Info Section -->
         <div id="userInfo" class="glass-effect p-6 rounded-lg mb-8 text-center">
             <h2 class="text-3xl font-bold">Hello, <span id="userName">Guest</span></h2>
-            <p class="text-gray-400 mt-2">Track your meals, calories, and stay on top of your goals!</p>
+            <p class="text-gray-400 mt-2">Track your meals, macros, and stay on top of your goals!</p>
         </div>
 
         <!-- Daily Calories -->
@@ -148,9 +123,9 @@
             <p class="text-gray-400 mt-2 text-lg">of <span id="totalCalories">--</span> total</p>
         </div>
 
-        <!-- Meal Suggestions Section -->
+        <!-- Meal Search & Filters -->
         <div>
-            <h2 class="text-xl font-bold mb-4">Suggested Meals for You</h2>
+            <h2 class="text-xl font-bold mb-4">Search & Filter Meals</h2>
             <input type="text" id="searchInput" placeholder="Search meals..." class="w-full p-4 mb-4 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
             <select id="dietFilter" class="w-full p-4 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 mb-8">
                 <option value="">All Types</option>
@@ -163,6 +138,25 @@
             </div>
         </div>
 
+        <!-- Meal Breakdown & Nutrient Insights -->
+        <div id="mealBreakdown" class="glass-effect p-6 rounded-lg mb-8">
+            <h2 class="text-xl font-bold mb-4">Meal Nutrient Breakdown</h2>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="flex flex-col items-center">
+                    <h3 class="text-lg font-bold">Protein</h3>
+                    <p id="proteinTotal">0g</p>
+                </div>
+                <div class="flex flex-col items-center">
+                    <h3 class="text-lg font-bold">Fat</h3>
+                    <p id="fatTotal">0g</p>
+                </div>
+                <div class="flex flex-col items-center">
+                    <h3 class="text-lg font-bold">Carbs</h3>
+                    <p id="carbsTotal">0g</p>
+                </div>
+            </div>
+        </div>
+
         <!-- Saved Meals Section -->
         <div>
             <h2 class="text-xl font-bold mb-4">Saved Meals</h2>
@@ -171,29 +165,27 @@
             </div>
         </div>
 
-        <!-- Analytics Section -->
-        <div>
-            <h2 class="text-xl font-bold mb-4">Your Nutritional Insights</h2>
-            <div id="nutritionAnalytics">
-                <!-- Charts and Graphs showing progress & nutritional breakdown -->
-            </div>
+        <!-- Progress Reports -->
+        <div id="progressReport" class="report-card">
+            <h2 class="text-xl font-bold mb-4">Progress Reports</h2>
+            <canvas id="progressChart"></canvas>
         </div>
-
     </main>
 
     <script>
         let meals = [
-            { name: "Grilled Chicken Salad", calories: 350, type: "high-protein", protein: 42, fat: 7, carbs: 10 },
-            { name: "Salmon with Quinoa", calories: 450, type: "keto", protein: 55, fat: 15, carbs: 5 },
-            { name: "Vegetarian Buddha Bowl", calories: 380, type: "vegetarian", protein: 38, fat: 10, carbs: 25 },
-            { name: "Greek Yogurt Parfait", calories: 280, type: "vegetarian", protein: 15, fat: 4, carbs: 35 },
+            { name: "Grilled Chicken Salad", calories: 350, protein: 42, fat: 7, carbs: 10, type: "high-protein" },
+            { name: "Salmon with Quinoa", calories: 450, protein: 55, fat: 15, carbs: 5, type: "keto" },
+            { name: "Vegetarian Buddha Bowl", calories: 380, protein: 38, fat: 10, carbs: 25, type: "vegetarian" },
+            { name: "Greek Yogurt Parfait", calories: 280, protein: 15, fat: 4, carbs: 35, type: "vegetarian" },
             // Add more meals here
         ];
-        let calorieGoal = 0, userName = "Guest";
+        let calorieGoal = 0, userName = "Guest,"
 
         document.addEventListener('DOMContentLoaded', () => {
             checkLocalStorage(); // Check if user data is stored in localStorage
             displayMeals(meals);
+            initializeProgressChart(); // Initialize chart for reports
         });
 
         // Function to check localStorage for user data
@@ -223,10 +215,28 @@
 
         // Function to update calories and progress
         function updateCalories() {
-            const remainingCalories = calorieGoal - meals.reduce((acc, meal) => acc + meal.calories, 0);
+            const consumedCalories = meals.reduce((acc, meal) => acc + meal.calories, 0);
+            const remainingCalories = calorieGoal - consumedCalories;
+
             document.getElementById('remainingCalories').textContent = remainingCalories;
             document.getElementById('totalCalories').textContent = calorieGoal;
+
             document.documentElement.style.setProperty('--progress', ((calorieGoal - remainingCalories) / calorieGoal) * 100 + '%');
+
+            updateNutrientBreakdown();
+        }
+
+        // Function to update nutrient breakdown
+        function updateNutrientBreakdown() {
+            let proteinTotal = 0, fatTotal = 0, carbsTotal = 0;
+            meals.forEach(meal => {
+                proteinTotal += meal.protein;
+                fatTotal += meal.fat;
+                carbsTotal += meal.carbs;
+            });
+            document.getElementById('proteinTotal').textContent = `${proteinTotal}g`;
+            document.getElementById('fatTotal').textContent = `${fatTotal}g`;
+            document.getElementById('carbsTotal').textContent = `${carbsTotal}g`;
         }
 
         // Function to display meals
@@ -275,20 +285,33 @@
             document.getElementById('privacyModal').classList.remove('active');
         }
 
-        // Theme toggle function
-        function toggleTheme() {
-            document.body.classList.toggle('dark-theme');
-            document.documentElement.style.setProperty('--bg-color', document.body.classList.contains('dark-theme') ? '#1a1c23' : '#ffffff');
-            document.documentElement.style.setProperty('--text-color', document.body.classList.contains('dark-theme') ? '#ffffff' : '#000000');
+        // Function to initialize the progress chart
+        function initializeProgressChart() {
+            const ctx = document.getElementById('progressChart').getContext('2d');
+            const labels = ['Consumed', 'Remaining'];
+            const data = {
+                labels: labels,
+                datasets: [{
+                    data: [calorieGoal - meals.reduce((acc, meal) => acc + meal.calories, 0), meals.reduce((acc, meal) => acc + meal.calories, 0)],
+                    backgroundColor: ['#3b82f6', '#1e1e2f'],
+                }]
+            };
+
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: data,
+                options: {
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    responsive: true,
+                    maintainAspectRatio: false,
+                }
+            });
         }
     </script>
 
-</body>
-</html>
-
-
-
-        }
-    </script>
 </body>
 </html>
