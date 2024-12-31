@@ -11,7 +11,6 @@
             font-family: 'Space Grotesk', sans-serif;
             background: linear-gradient(135deg, #13151a 0%, #1a1c23 100%);
             color: white;
-            overflow-x: hidden;
         }
         .glass-effect {
             background: rgba(255, 255, 255, 0.05);
@@ -39,8 +38,31 @@
             transform: translateY(-3px);
             opacity: 0.9;
         }
+        .meal-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
         .meal-card:hover {
             transform: scale(1.02);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        .circle {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            background: conic-gradient(
+                #34d399 0%,
+                #34d399 var(--progress, 0),
+                #1a1c23 var(--progress, 0)
+            );
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+        }
+        .circle span {
+            font-size: 1.5rem;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -65,8 +87,10 @@
         <!-- Daily Calories -->
         <div id="calorieTracker" class="glass-effect p-6 rounded-lg mb-8 text-center">
             <h2 class="text-xl font-bold">Daily Calories Remaining</h2>
-            <div id="remainingCalories" class="text-4xl font-bold gradient-text">--</div>
-            <p class="text-gray-400">of <span id="totalCalories">--</span> total</p>
+            <div class="circle" id="progressCircle">
+                <span id="remainingCalories">--</span>
+            </div>
+            <p class="text-gray-400 mt-2">of <span id="totalCalories">--</span> total</p>
         </div>
 
         <!-- Meals Section -->
@@ -77,17 +101,6 @@
             </div>
         </div>
     </main>
-
-    <!-- Privacy Policy Modal -->
-    <div id="privacyModal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 hidden">
-        <div class="glass-effect p-8 rounded-2xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
-            <h2 class="text-2xl font-bold gradient-text mb-4">Privacy Policy</h2>
-            <p class="text-gray-300 text-sm">
-                This application ("Opulence Meal Tracker") is a beta version and is provided "as is" without any guarantees or warranties. The creators of this application shall not be held liable for any inaccuracies, errors, or outcomes arising from its use. Nutritional information is for demonstration purposes only and should not be relied upon for health-related decisions. User data may not be stored securely as this is a prototype. Use of the application is entirely at your own risk.
-            </p>
-            <button class="button mt-6" onclick="closePrivacyPolicy()">Close</button>
-        </div>
-    </div>
 
     <script>
         let meals = [
@@ -127,6 +140,9 @@
         function updateCalories() {
             document.getElementById('remainingCalories').innerText = remainingCalories;
             document.getElementById('totalCalories').innerText = calorieGoal;
+
+            const progress = (remainingCalories / calorieGoal) * 100 || 0;
+            document.getElementById('progressCircle').style.setProperty('--progress', `${progress}%`);
         }
 
         function displayMeals() {
@@ -154,15 +170,6 @@
             }
         }
 
-        function showPrivacyPolicy() {
-            document.getElementById('privacyModal').classList.remove('hidden');
-        }
-
-        function closePrivacyPolicy() {
-            document.getElementById('privacyModal').classList.add('hidden');
-        }
-
-        // Reset on page load
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('calorieModal').style.display = 'flex';
         });
